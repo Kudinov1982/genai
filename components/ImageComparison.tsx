@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MoveHorizontal, ZoomIn, Info, MapPin } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { MoveHorizontal, ZoomIn } from 'lucide-react';
 import { Annotation } from '../types';
 import { Tooltip } from './ModernUI';
 
@@ -29,15 +29,7 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
     const rect = containerRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
     const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
-    
     setMousePos({ x, y });
-    
-    // Only update slider if NOT in annotation mode and dragging (simplified to hover for this demo)
-    if (!isAnnotationMode && !showMagnifier) {
-       // Optional: Drag logic could go here, but hover-move for slider is intuitive for desktop
-       // let's stick to click-drag for slider or just a simple range input overlay? 
-       // For better UX, let's use the range input below, but update specific "Lens" here.
-    }
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +44,17 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
         onAddAnnotation(x, y);
     }
   };
+
+  // --- Logic for Magnifier (Refactored to be safer) ---
+  const containerWidth = containerRef.current?.offsetWidth || 1;
+  const containerHeight = containerRef.current?.offsetHeight || 1;
+  
+  const mousePercentX = (mousePos.x / containerWidth) * 100;
+  const mousePercentY = (mousePos.y / containerHeight) * 100;
+
+  // Which image to show in magnifier?
+  const magnifierImage = sliderPosition > mousePercentX ? beforeImage : afterImage;
+  // ----------------------------------------------------
 
   return (
     <div className="flex flex-col gap-2 select-none">
@@ -77,14 +80,12 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
         onMouseLeave={() => { setIsHovering(false); setShowMagnifier(false); }}
         onClick={handleContainerClick}
       >
-        {/* Background Image (After / Modified) */}
         <img 
             src={afterImage} 
             alt="After" 
             className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none" 
         />
 
-        {/* Foreground Image (Before / Original) - Clipped */}
         <div 
             className="absolute inset-0 w-full h-full overflow-hidden select-none pointer-events-none"
             style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
@@ -96,7 +97,6 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
             />
         </div>
 
-        {/* Slider Line */}
         <div 
             className="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_10px_rgba(0,0,0,0.5)] z-20 pointer-events-none"
             style={{ left: `${sliderPosition}%` }}
@@ -106,7 +106,6 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
             </div>
         </div>
 
-        {/* Range Input Overlay for Control */}
         {!isAnnotationMode && !showMagnifier && (
             <input
                 type="range"
@@ -118,7 +117,6 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
             />
         )}
 
-        {/* Annotations Layer */}
         {annotations.map((ann) => (
              <Tooltip key={ann.id} content={`${ann.author}: ${ann.text}`} position="top">
                 <div 
@@ -129,17 +127,24 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
              </Tooltip>
         ))}
 
-        {/* Magnifier Glass */}
         {showMagnifier && isHovering && (
             <div 
                 className="absolute z-50 w-32 h-32 rounded-full border-4 border-white shadow-2xl overflow-hidden pointer-events-none bg-paper-100"
                 style={{ 
                     left: mousePos.x - 64, 
                     top: mousePos.y - 64,
-                    backgroundImage: `url(${sliderPosition > (mousePos.x / (containerRef.current?.offsetWidth || 1) * 100) ? beforeImage : afterImage})`,
-                    backgroundPosition: `${(mousePos.x / (containerRef.current?.offsetWidth || 1)) * 100}% ${(mousePos.y / (containerRef.current?.offsetHeight || 1)) * 100}%`,
-                    backgroundSize: '300%', // 3x Zoom
+                    backgroundImage: `url(${magnifierImage})`,
+                    backgroundPosition: `${mousePercentX}% ${mousePercentY}%`,
+                    backgroundSize: '300%',
                     backgroundRepeat: 'no-repeat'
                 }}
             >
-                <div className="absolute inset-0 shadow-inner rounded-full ring-1 ring-black/10
+                <div className="absolute inset-0 shadow-inner rounded-full ring-1 ring-black/10"></div>
+            </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ImageComparison;

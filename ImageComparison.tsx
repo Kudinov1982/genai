@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MoveHorizontal, ZoomIn, Info, MapPin } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { MoveHorizontal, ZoomIn } from 'lucide-react';
 import { Annotation } from '../types';
 import { Tooltip } from './ModernUI';
 
@@ -29,7 +29,6 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
     const rect = containerRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
     const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
-    
     setMousePos({ x, y });
   };
 
@@ -70,14 +69,12 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
         onMouseLeave={() => { setIsHovering(false); setShowMagnifier(false); }}
         onClick={handleContainerClick}
       >
-        {/* Background Image (After / Modified) */}
         <img 
             src={afterImage} 
             alt="After" 
             className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none" 
         />
 
-        {/* Foreground Image (Before / Original) - Clipped */}
         <div 
             className="absolute inset-0 w-full h-full overflow-hidden select-none pointer-events-none"
             style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
@@ -89,7 +86,6 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
             />
         </div>
 
-        {/* Slider Line */}
         <div 
             className="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_10px_rgba(0,0,0,0.5)] z-20 pointer-events-none"
             style={{ left: `${sliderPosition}%` }}
@@ -99,7 +95,6 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
             </div>
         </div>
 
-        {/* Range Input Overlay for Control */}
         {!isAnnotationMode && !showMagnifier && (
             <input
                 type="range"
@@ -111,7 +106,6 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
             />
         )}
 
-        {/* Annotations Layer */}
         {annotations.map((ann) => (
              <Tooltip key={ann.id} content={`${ann.author}: ${ann.text}`} position="top">
                 <div 
@@ -122,7 +116,6 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
              </Tooltip>
         ))}
 
-        {/* Magnifier Glass */}
         {showMagnifier && isHovering && (
             <div 
                 className="absolute z-50 w-32 h-32 rounded-full border-4 border-white shadow-2xl overflow-hidden pointer-events-none bg-paper-100"
@@ -131,7 +124,7 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
                     top: mousePos.y - 64,
                     backgroundImage: `url(${sliderPosition > (mousePos.x / (containerRef.current?.offsetWidth || 1) * 100) ? beforeImage : afterImage})`,
                     backgroundPosition: `${(mousePos.x / (containerRef.current?.offsetWidth || 1)) * 100}% ${(mousePos.y / (containerRef.current?.offsetHeight || 1)) * 100}%`,
-                    backgroundSize: '300%', // 3x Zoom
+                    backgroundSize: '300%',
                     backgroundRepeat: 'no-repeat'
                 }}
             >

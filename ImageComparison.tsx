@@ -31,13 +31,6 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
     const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
     
     setMousePos({ x, y });
-    
-    // Only update slider if NOT in annotation mode and dragging (simplified to hover for this demo)
-    if (!isAnnotationMode && !showMagnifier) {
-       // Optional: Drag logic could go here, but hover-move for slider is intuitive for desktop
-       // let's stick to click-drag for slider or just a simple range input overlay? 
-       // For better UX, let's use the range input below, but update specific "Lens" here.
-    }
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,4 +135,12 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
                     backgroundRepeat: 'no-repeat'
                 }}
             >
-                <div className="absolute inset-0 shadow-inner rounded-full ring-1 ring-black/10
+                <div className="absolute inset-0 shadow-inner rounded-full ring-1 ring-black/10"></div>
+            </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ImageComparison;

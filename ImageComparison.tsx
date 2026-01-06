@@ -45,6 +45,17 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
     }
   };
 
+  // --- Logic for Magnifier (Refactored to be safer) ---
+  const containerWidth = containerRef.current?.offsetWidth || 1;
+  const containerHeight = containerRef.current?.offsetHeight || 1;
+  
+  const mousePercentX = (mousePos.x / containerWidth) * 100;
+  const mousePercentY = (mousePos.y / containerHeight) * 100;
+
+  // Which image to show in magnifier?
+  const magnifierImage = sliderPosition > mousePercentX ? beforeImage : afterImage;
+  // ----------------------------------------------------
+
   return (
     <div className="flex flex-col gap-2 select-none">
       <div className="flex justify-between items-center px-1">
@@ -122,8 +133,8 @@ const ImageComparison: React.FC<ImageComparisonProps> = ({
                 style={{ 
                     left: mousePos.x - 64, 
                     top: mousePos.y - 64,
-                    backgroundImage: `url(${sliderPosition > (mousePos.x / (containerRef.current?.offsetWidth || 1) * 100) ? beforeImage : afterImage})`,
-                    backgroundPosition: `${(mousePos.x / (containerRef.current?.offsetWidth || 1)) * 100}% ${(mousePos.y / (containerRef.current?.offsetHeight || 1)) * 100}%`,
+                    backgroundImage: `url(${magnifierImage})`,
+                    backgroundPosition: `${mousePercentX}% ${mousePercentY}%`,
                     backgroundSize: '300%',
                     backgroundRepeat: 'no-repeat'
                 }}
